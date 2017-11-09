@@ -207,10 +207,15 @@ var processUpdate = require('./process-update');
 
 var customHandler;
 var subscribeAllHandler;
+
+function isInvalidName(name, nameOption) {
+  return name && nameOption && name !== nameOption
+}
+
 function processMessage(obj) {
   switch(obj.action) {
     case "building":
-      if (options.log) {
+      if (options.log && !isInvalidName(obj.name, options.name)) {
         console.log(
           "[HMR] bundle " + (obj.name ? "'" + obj.name + "' " : "") +
           "rebuilding"
@@ -218,7 +223,7 @@ function processMessage(obj) {
       }
       break;
     case "built":
-      if (options.log) {
+      if (options.log && !isInvalidName(obj.name, options.name)) {
         console.log(
           "[HMR] bundle " + (obj.name ? "'" + obj.name + "' " : "") +
           "rebuilt in " + obj.time + "ms"
@@ -226,7 +231,7 @@ function processMessage(obj) {
       }
       // fall through
     case "sync":
-      if (obj.name && options.name && obj.name !== options.name) {
+      if (isInvalidName(obj.name, options.name)) {
         return;
       }
       if (obj.errors.length > 0) {
